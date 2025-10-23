@@ -13,7 +13,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { fetchNotes } from "../../services/noteService";
-import type { FetchNotesResponse } from "../../types/note";
+import type { FetchNotesResponse } from "../../types/api";
 import { useEffect, useState } from "react";
 
 export default function App() {
