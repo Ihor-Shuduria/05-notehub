@@ -4,7 +4,7 @@ import css from "./NoteForm.module.css";
 import { createNote } from "../../services/noteService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-interface Props {
+interface NoteFormProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -20,7 +20,7 @@ const schema = Yup.object().shape({
     .required("Required"),
 });
 
-export default function NoteForm({ onSuccess, onCancel }: Props) {
+export default function NoteForm({ onSuccess, onCancel }: NoteFormProps) {
   const qc = useQueryClient();
 
   const { mutateAsync, isPending, error } = useMutation({
