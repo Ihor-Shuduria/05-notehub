@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
 
-interface Props {
+interface ModalProps {
   children: React.ReactNode;
   onClose: () => void;
 }
@@ -19,13 +19,21 @@ function ensureModalRoot() {
   return el;
 }
 
-export default function Modal({ children, onClose }: Props) {
+export default function Modal({ children, onClose }: ModalProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+
+      document.body.style.overflow = originalOverflow;
+    };
   }, [onClose]);
 
   const root = ensureModalRoot();

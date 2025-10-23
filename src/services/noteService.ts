@@ -1,12 +1,13 @@
 import axios, { type AxiosResponse } from "axios";
-import type { Note, FetchNotesParams, FetchNotesResponse } from "../types/note";
+import type { Note } from "../types/note";
+import type { FetchNotesParams, FetchNotesResponse } from "../types/api";
 
 const API_BASE = "https://notehub-public.goit.study/api";
 
 const tokenFromEnv = import.meta.env.VITE_NOTEHUB_TOKEN as string | undefined;
 
 if (!tokenFromEnv) {
-  console.warn();
+  console.warn("⚠️ Missing VITE_NOTEHUB_TOKEN in environment variables");
 }
 
 const api = axios.create({
@@ -24,7 +25,13 @@ export async function fetchNotes(
   try {
     const { page = 1, perPage = 12, search } = params;
 
-    const res = await api.get("/notes", { params: { page, perPage, search } });
+    const res: AxiosResponse<{
+      notes: Note[];
+      totalPages: number;
+      total: number;
+      page: number;
+      perPage: number;
+    }> = await api.get("/notes", { params: { page, perPage, search } });
 
     const {
       notes,
@@ -61,9 +68,9 @@ export async function createNote(payload: {
   }
 }
 
-export async function deleteNote(id: string): Promise<{ id: string }> {
+export async function deleteNote(id: string): Promise<Note> {
   try {
-    const res: AxiosResponse<{ id: string }> = await api.delete(`/notes/${id}`);
+    const res: AxiosResponse<Note> = await api.delete(`/notes/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error deleting note:", error);

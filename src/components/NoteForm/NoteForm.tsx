@@ -2,6 +2,7 @@ import { Formik, Form, Field, ErrorMessage as FE } from "formik";
 import * as Yup from "yup";
 import css from "./NoteForm.module.css";
 import { createNote } from "../../services/noteService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   onSuccess: () => void;
@@ -20,20 +21,29 @@ const schema = Yup.object().shape({
 });
 
 export default function NoteForm({ onSuccess, onCancel }: Props) {
+  const qc = useQueryClient();
+
+  const { mutateAsync, isPending, error } = useMutation({
+    mutationFn: createNote,
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["notes"] });
+      onSuccess();
+    },
+  });
+
   return (
     <div>
       <h2 className={css.heading}>Create note</h2>
       <Formik
         initialValues={{ title: "", content: "", tag: "Todo" }}
         validationSchema={schema}
-        onSubmit={async (values, { setSubmitting, resetForm, setErrors }) => {
+        onSubmit={async (values, { setSubmitting, setErrors, resetForm }) => {
           try {
-            await createNote(values);
+            await mutateAsync(values);
             resetForm();
-            onSuccess();
           } catch (err: unknown) {
             const message =
-              err instanceof Error ? err.message : "Failed create";
+              err instanceof Error ? err.message : "Failed to create note";
             setErrors({ title: message });
           } finally {
             setSubmitting(false);
@@ -72,6 +82,12 @@ export default function NoteForm({ onSuccess, onCancel }: Props) {
               <FE name="tag" component="div" className={css.error} />
             </div>
 
+            {error && (
+              <div className={css.error}>
+                {(error as Error).message || "Failed to create note."}
+              </div>
+            )}
+
             <div className={css.actions}>
               <button
                 type="button"
@@ -83,9 +99,9 @@ export default function NoteForm({ onSuccess, onCancel }: Props) {
               <button
                 type="submit"
                 className={css.submitButton}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isPending}
               >
-                {isSubmitting ? "Creating..." : "Create note"}
+                {isPending ? "Creating..." : "Create note"}
               </button>
             </div>
           </Form>

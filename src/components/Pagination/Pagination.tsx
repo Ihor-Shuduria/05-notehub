@@ -1,7 +1,7 @@
 import ReactPaginate from "react-paginate";
 import css from "./Pagination.module.css";
 
-interface Props {
+interface PaginationProps {
   pageCount: number;
   forcePage?: number;
   onPageChange: (selected: number) => void;
@@ -11,7 +11,7 @@ export default function PaginationComp({
   pageCount,
   forcePage = 0,
   onPageChange,
-}: Props) {
+}: PaginationProps) {
   return (
     <div className={css.wrap}>
       <ReactPaginate
